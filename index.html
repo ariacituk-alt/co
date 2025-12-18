@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Ekosistem Laut</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      background: #4fc3f7;
+      padding: 10px;
+      color: white;
+      margin: 0;
+    }
+    .kontainer {
+      background: #b3e5fc;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 900px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    }
+    .laut {
+      position: relative;
+      height: 300px;
+      background: linear-gradient(to bottom, #4fc3f7, #0288d1);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    /* ==== Gambar-gambar ==== */
+    .ikan-kecil {
+      position: absolute;
+      width: 50px;
+      height: 30px;
+      background: url('ikan-kecil.png') no-repeat center/contain;
+      animation: berenang 12s linear infinite;
+    }
+    .ikan-besar {
+      position: absolute;
+      width: 80px;
+      height: 50px;
+      background: url('ikan-besar.png') no-repeat center/contain;
+      animation: berenang 14s linear infinite;
+    }
+    .hiu {
+      position: absolute;
+      width: 120px;
+      height: 70px;
+      background: url('hiu.png') no-repeat center/contain;
+      animation: berenang 16s linear infinite;
+    }
+    .plankton {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: url('plankton.png') no-repeat center/contain;
+      animation: planktonBergerak 8s linear infinite;
+    }
+    .gelembung {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: url('gelembung.png') no-repeat center/contain;
+      animation: gelembungNaik 6s linear infinite;
+    }
+
+    /* ==== Animasi ==== */
+    @keyframes berenang {
+      0% { left: -150px; }
+      100% { left: 100%; }
+    }
+    @keyframes planktonBergerak {
+      0% { top: 100%; opacity: 1; }
+      100% { top: 0%; opacity: 0; }
+    }
+    @keyframes gelembungNaik {
+      0% { bottom: 0; opacity: 1; }
+      100% { bottom: 100%; opacity: 0; }
+    }
+
+    /* ==== Panel Kontrol ==== */
+    .kontrol {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .slider-box {
+      margin: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+    }
+    .status {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+    }
+    .kritik {
+      color: white;
+      background: #d32f2f;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 10px;
+      display: none;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #4caf50;
+      color: white;
+    }
+    button:hover {
+      background: #388e3c;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Simulasi Ekosistem Laut</h2>
+  <p>Gunakan kontrol di bawah untuk mengubah kondisi lingkungan dan amati dampaknya!</p>
+
+  <div class="kontainer">
+    <div class="laut" id="laut"></div>
+
+    <div class="kontrol">
+      <div class="slider-box">
+        <label>Suhu Air: <span id="valSuhu">20</span>°C</label><br>
+        <input type="range" id="suhu" min="10" max="40" value="20">
+      </div>
+      <div class="slider-box">
+        <label>Tingkat Polusi: <span id="valPolusi">50</span>%</label><br>
+        <input type="range" id="polusi" min="0" max="100" value="50">
+      </div>
+      <div class="slider-box">
+        <label>Nutirisi: <span id="valNutrisi">50</span>%</label><br>
+        <input type="range" id="nutrisi" min="0" max="100" value="50">
+      </div>
+      <div class="slider-box">
+        <label>Cahaya Matahari: <span id="valCahaya">70</span>%</label><br>
+        <input type="range" id="cahaya" min="0" max="100" value="70">
+      </div>
+    </div>
+
+    <div class="status">
+      <h3>Status Ekosistem</h3>
+      <p>Plankton: <span id="plankton">20</span></p>
+      <p>Ikan Kecil: <span id="ikanKecil">5</span></p>
+      <p>Ikan Besar: <span id="ikanBesar">2</span></p>
+      <p>Hiu: <span id="hiu">1</span></p>
+      <div id="peringatan" class="kritik">⚠ Ekosistem Kritis!</div>
+    </div>
+
+    <button onclick="resetSimulasi()">RESET SIMULASI</button>
+  </div>
+
+<script>
+function hitungEkosistem() {
+  let suhu = parseInt(document.getElementById("suhu").value);
+  let polusi = parseInt(document.getElementById("polusi").value);
+  let nutrisi = parseInt(document.getElementById("nutrisi").value);
+  let cahaya = parseInt(document.getElementById("cahaya").value);
+
+  document.getElementById("valSuhu").innerText = suhu;
+  document.getElementById("valPolusi").innerText = polusi;
+  document.getElementById("valNutrisi").innerText = nutrisi;
+  document.getElementById("valCahaya").innerText = cahaya;
+
+  let plankton = Math.max(0, Math.floor((nutrisi + cahaya) / 10 - polusi / 20));
+  let ikanKecil = Math.max(0, Math.floor(plankton / 2 - polusi / 30));
+  let ikanBesar = Math.max(0, Math.floor(ikanKecil / 2 - polusi / 40));
+  let hiu = Math.max(0, Math.floor(ikanBesar / 2 - suhu / 30));
+
+  document.getElementById("plankton").innerText = plankton;
+  document.getElementById("ikanKecil").innerText = ikanKecil;
+  document.getElementById("ikanBesar").innerText = ikanBesar;
+  document.getElementById("hiu").innerText = hiu;
+
+  if (plankton < 5 || ikanKecil < 2 || ikanBesar < 1) {
+    document.getElementById("peringatan").style.display = "block";
+  } else {
+    document.getElementById("peringatan").style.display = "none";
+  }
+
+  updateAnimasi(plankton, ikanKecil, ikanBesar, hiu);
+}
+
+function resetSimulasi() {
+  document.getElementById("suhu").value = 20;
+  document.getElementById("polusi").value = 50;
+  document.getElementById("nutrisi").value = 50;
+  document.getElementById("cahaya").value = 70;
+  hitungEkosistem();
+}
+
+function updateAnimasi(plankton, ikanKecil, ikanBesar, hiu) {
+  let laut = document.getElementById("laut");
+  laut.innerHTML = "";
+
+  for (let i=0; i<plankton; i++) {
+    let p = document.createElement("div");
+    p.className = "plankton";
+    p.style.left = Math.random()*90 + "%";
+    p.style.animationDuration = (5+Math.random()*5) + "s";
+    laut.appendChild(p);
+  }
+  for (let i=0; i<ikanKecil; i++) {
+    let ikan = document.createElement("div");
+    ikan.className = "ikan-kecil";
+    ikan.style.top = Math.random()*200 + "px";
+    ikan.style.animationDuration = (8+Math.random()*5) + "s";
+    laut.appendChild(ikan);
+  }
+  for (let i=0; i<ikanBesar; i++) {
+    let ikan = document.createElement("div");
+    ikan.className = "ikan-besar";
+    ikan.style.top = Math.random()*200 + "px";
+    ikan.style.animationDuration = (10+Math.random()*6) + "s";
+    laut.appendChild(ikan);
+  }
+  for (let i=0; i<hiu; i++) {
+    let ikan = document.createElement("div");
+    ikan.className = "hiu";
+    ikan.style.top = Math.random()*200 + "px";
+    ikan.style.animationDuration = (12+Math.random()*6) + "s";
+    laut.appendChild(ikan);
+  }
+  for (let i=0; i<5; i++) {
+    let b = document.createElement("div");
+    b.className = "gelembung";
+    b.style.left = Math.random()*90 + "%";
+    b.style.animationDuration = (4+Math.random()*4) + "s";
+    laut.appendChild(b);
+  }
+}
+
+document.querySelectorAll("input[type=range]").forEach(slider => {
+  slider.addEventListener("input", hitungEkosistem);
+});
+
+hitungEkosistem();
+</script>
+
+</body>
+</html>
